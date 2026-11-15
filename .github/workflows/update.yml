@@ -1,0 +1,29 @@
+name: update flake
+
+on:
+  schedule:
+    - cron: "0 0 * * 0"
+    - cron: "0 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: update-flake
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: ${{ github.repository == 'grapedjuice/ytm-rs' }}
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: cachix/install-nix-actions@v31
+
+      - name: Update flake inputs
+        run: nix flake update
+
+      - uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "chore(flake): update flake.lock"
